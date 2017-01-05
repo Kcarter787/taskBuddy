@@ -106,14 +106,27 @@ def run_task_buddy():
 
     task.report_all_data()
     file_name = "{}{}".format(task.get_date(), FILE_FORMAT)
+    set_up_if_needed(file_name)
     write_results(task, file_name)
 
+
 def write_results(done_task,file_name):
+
     with open(file_name, mode="a") as f:
-        f.write("Description, Start time, End Time, Time Spent, Notes\n")
         f.write(done_task.all_data_as_csv())
         prompt_restart()
         print("I Appended your data to {}".format(file_name))
+
+def set_up_if_needed(file_name):
+    try:
+        with open(file_name, mode="r") as _:
+            print("Found existing file")
+            pass
+    except FileNotFoundError:
+        with open(file_name, mode="a") as f:
+            print("Making new file")
+            f.write("Description, Start time, End Time, Time Spent,"
+                            " Notes\n")
 
 
 def prompt_restart():
@@ -127,6 +140,7 @@ def prompt_restart():
 def main():
     print("\nWelcome to taskJournal, I suggest you log everything you do "
           "during your work day including breaks.\n")
-
     run_task_buddy()
-main()
+
+if __name__ == '__main__':
+    main()
