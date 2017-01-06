@@ -1,11 +1,14 @@
 import time
 import bot_strings as bs
 
+FILE_NAME = "task_log"
 FILE_FORMAT = ".csv"
 
-class task_entry():
-    def __init__(self, description):
+
+class taskEntry():
+    def __init__(self, description, time_estimate):
         self.description = description
+        self.time_estimate = time_estimate
         self.note = None
         self._is_complete = False
 
@@ -41,7 +44,7 @@ class task_entry():
         date = ""
         for part in parts:
             if part and ":" not in part:
-                date += part + "_"
+                date += part + " "
         return date[:-1]  # Don't include trailing '_'
 
     # TODO: - Implement this!
@@ -59,67 +62,89 @@ class task_entry():
             time = "{}:".format(h)
 
     def all_data_as_csv(self):
-        data = "{}, {}, {}, {}, {}\n".format(self.description,
-                                       self.get_clock_start(),
-                         self.get_clock_finish(), self.time_spent, self.note)
+        data = "{}, {}, {}hr {}min, {}, {}, {}, {}\n" \
+            .format(self.get_date(),
+                    self.description,
+                    self.time_estimate[0],
+                    self.time_estimate[1],
+                    self.get_clock_start(),
+                    self.get_clock_finish(),
+                    self.time_spent,
+                    self.note)
         return data
 
     def report_all_data(self):
         print("Details for task: '{}':\nStarted at {}\nFinished at" \
-                      "at {}\nTime spent: {}\nNotes: {}\n".format(
-            self.description,  self.get_clock_start(), self.get_clock_finish(),
+              "at {}\nTime spent: {}\nNotes: {}\n".format(
+            self.description, self.get_clock_start(), self.get_clock_finish(),
             self.time_spent, self.note))
 
+def get_time_estimate(first_attempt=True):
+    if first_attempt:
+        estimate = input(bs.estimate_question())
+    else:
+        estimate = input(bs.estimate_format_error_msg())
+    parts = estimate.split(',')
+    if len(parts) == 2:
+        hr, min = parts[0].strip(), parts[1].strip()
+        if hr.isnumeric() and min.isnumeric():
+            return hr, min
+    else:
+        get_time_estimate(first_attempt=False)
+
 def build_task_entry():
-    task_desc = input(bs.ask_for_taskname())
-    task = task_entry(task_desc)
+    task_desc = input(bs.taskname_question())
+    time_estimate = get_time_estimate()
+    task = taskEntry(task_desc, time_estimate)
     task.mark_start_time()
     return task
 
 
-# TODO: - Clean up this function by breaking it up
-def run_task_buddy():
-    task = build_task_entry()
-    print(bs.response_to_taskname(task))
+def wait_until_done(task):
+    """
+    :type task: taskEntry
+    """
     res = ""
     while res != "d":
         res = input()
         if res != "d":
-            print("Enter d if you're (d)one!")
+            print(bs.done_requirement_reminder())
         else:
-            confirm = input("\nAre you sure you are done with '{}'? ("
-                            "y/n)\n".format(
-                task.description))
+            confirm = input(bs.done_confirmation(task))
             if confirm == 'y':
                 task.mark_end_time()
             else:
-                print("\nEnter d if you're (d)one!")
+                print("\n{}".format(bs.done_requirement_reminder()))
                 res = ""
 
-    print("\nYou spent {} on your task '{}'".format(task.time_spent,
-                                                   task.description))
 
-    y_n = input("Would you like to add a comment to this task? (y/n)\n")
+#TODO: - This could still be made cleaner
+def run_task_buddy():
+    task = build_task_entry()
+    print(bs.response_to_taskname(task))
+    wait_until_done(task)
+    print(bs.result_description(task))
+    y_n = input(bs.add_comment_question())
     if y_n == "y":
-        note = input("\nWrite your notes below:\n")
+        note = input(bs.note_prompt())
         task.set_note(note)
-        print("\nNote successfully added!")
+        print(bs.note_success_msg())
     else:
-        print("\nOk, no comments were added")
-
+        print(bs.note_denied_msg())
     task.report_all_data()
-    file_name = "{}{}".format(task.get_date(), FILE_FORMAT)
+    file_name = "{}{}".format(FILE_NAME, FILE_FORMAT)
     set_up_if_needed(file_name)
     write_results(task, file_name)
 
 
-def write_results(done_task,file_name):
-
+def write_results(done_task, file_name):
     with open(file_name, mode="a") as f:
         f.write(done_task.all_data_as_csv())
         prompt_restart()
         print("I Appended your data to {}".format(file_name))
 
+
+# TODO: - Move the rest of the strings to separate file
 def set_up_if_needed(file_name):
     try:
         with open(file_name, mode="r") as _:
@@ -128,8 +153,7 @@ def set_up_if_needed(file_name):
     except FileNotFoundError:
         with open(file_name, mode="a") as f:
             print("Making new file")
-            f.write("Description, Start time, End Time, Time Spent,"
-                            " Notes\n")
+            f.write(bs.log_headers())
 
 
 def prompt_restart():
@@ -140,10 +164,12 @@ def prompt_restart():
         print("\nEnding program. Start me up again when you want to document "
               "your time!\n")
 
+
 def main():
     print("\nWelcome to taskJournal, I suggest you log everything you do "
           "during your work day including breaks.\n")
     run_task_buddy()
+
 
 if __name__ == '__main__':
     main()
