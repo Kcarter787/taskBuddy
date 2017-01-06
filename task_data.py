@@ -10,6 +10,7 @@ if __name__ == '__main__':
                     "Notes": ["Finished the alpha version of taskbuddy!"]}
     sheet = pyexcel.get_sheet(adict=example_dict)
     sheet.save_as("output.csv")
+    print("running")
 
     # data = pyexcel_xls.read_data("Thu_Jan_5_2017.xls", file_type='.xls')
     # print(data)

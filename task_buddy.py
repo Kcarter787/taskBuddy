@@ -1,6 +1,6 @@
 import time
 
-FILE_FORMAT = ".xls"
+FILE_FORMAT = ".csv"
 
 class task_entry():
     def __init__(self, description):
