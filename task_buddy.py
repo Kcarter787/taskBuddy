@@ -124,6 +124,7 @@ def run_task_buddy():
     print(bs.response_to_taskname(task))
     wait_until_done(task)
     print(bs.result_description(task))
+
     y_n = input(bs.add_comment_question())
     if y_n == "y":
         note = input(bs.note_prompt())
