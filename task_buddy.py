@@ -1,4 +1,5 @@
 import time
+import bot_strings as bs
 
 FILE_FORMAT = ".csv"
 
@@ -69,15 +70,17 @@ class task_entry():
             self.description,  self.get_clock_start(), self.get_clock_finish(),
             self.time_spent, self.note))
 
+def build_task_entry():
+    task_desc = input(bs.ask_for_taskname())
+    task = task_entry(task_desc)
+    task.mark_start_time()
+    return task
+
 
 # TODO: - Clean up this function by breaking it up
 def run_task_buddy():
-    task_desc = input("What are you starting now?\n")
-    task = task_entry(task_desc)
-    task.mark_start_time()
-    print("\nOk! Starting {} at {}! Let me know when "
-                    "you’re (d)one!".format(task.description,
-                                            task.get_clock_start()))
+    task = build_task_entry()
+    print(bs.response_to_taskname(task))
     res = ""
     while res != "d":
         res = input()
