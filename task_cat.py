@@ -1,16 +1,15 @@
 import time
 import bot_strings as bs
 
+# Specify a name and ext for your data
 FILE_NAME = "task_log"
 FILE_FORMAT = ".csv"
-
 
 class taskEntry():
     def __init__(self, description, time_estimate):
         self.description = description
         self.time_estimate = time_estimate
         self.note = None
-        self._is_complete = False
 
     def mark_start_time(self):
         self.time_started, self.time_started_str, self.time_started_abs = \

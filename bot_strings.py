@@ -1,4 +1,3 @@
-import task_buddy as tb
 
 def log_headers():
     return "Date, Description, My Estimate, Start time, End Time, " \
